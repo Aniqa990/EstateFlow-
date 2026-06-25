@@ -56,10 +56,10 @@ ALTER TABLE maintenance_pipeline_results ADD COLUMN IF NOT EXISTS human_approved
 
 Run in SQL Editor (in order):
 
-0. **`008_add_geo_columns.sql`** — only if your DB was created from the original schema without `latitude`/`longitude`  
-1. `005_seed_pakistan_data.sql` — 3 properties, 7 units, 10 named vendors  
-2. `006_seed_100_vendors.sql` — **100 vendors** with geo spread across cities  
-3. `007_seed_more_properties.sql` — 5 more properties + units  
+0. **`008_add_geo_columns.sql`** — only if your DB was created from the original schema without `latitude`/`longitude`
+1. `005_seed_pakistan_data.sql` — 3 properties, 7 units, 10 named vendors
+2. `006_seed_100_vendors.sql` — **100 vendors** with geo spread across cities
+3. `007_seed_more_properties.sql` — 5 more properties + units
 
 (005–007 now auto-add geo columns if missing; running **008** first is still the clearest fix.)
 
@@ -67,11 +67,11 @@ Verify vendors: `SELECT COUNT(*) FROM vendors WHERE email LIKE 'vendor%@estatefl
 
 ### How properties work (you do NOT have to use Supabase UI)
 
-| Role | What to do |
-|------|------------|
-| **Dev / quick start** | Run seed SQL above — tenants see properties in dropdown |
-| **Manager / admin** | App → **Properties** → add building name, city, units (`101, 102`) |
-| **Manual (optional)** | Supabase → Table Editor → `properties` + `units` |
+| Role                  | What to do                                                         |
+| --------------------- | ------------------------------------------------------------------ |
+| **Dev / quick start** | Run seed SQL above — tenants see properties in dropdown            |
+| **Manager / admin**   | App → **Properties** → add building name, city, units (`101, 102`) |
+| **Manual (optional)** | Supabase → Table Editor → `properties` + `units`                   |
 
 Tenants **cannot** create properties; they only select from the list when submitting a request.
 
@@ -133,15 +133,23 @@ App: http://localhost:5173
 
 ## Maintenance agent pipeline
 
-1. `pii_redactor` — masks CNIC/phone/email  
-2. `security_scanner` — injection/spam  
-3. `fraud_check` — duplicate submissions (24h)  
-4. `intake_classifier` — category/urgency (OpenRouter)  
-5. `governance` — compliance flags, human gate for Critical  
-6. `performance_monitor` — SLA score  
-7. `dispatcher` — haversine vendor match + schedule  
+1. `pii_redactor` — masks CNIC/phone/email
+2. `security_scanner` — injection/spam
+3. `fraud_check` — duplicate submissions (24h)
+4. `intake_classifier` — category/urgency (OpenRouter)
+5. `governance` — compliance flags, human gate for Critical
+6. `performance_monitor` — SLA score
+7. `dispatcher` — haversine vendor match + schedule
 
 Results persist to `maintenance_pipeline_results` and `agent_logs`.
+
+for manager
+aisha@gmail.com
+123456
+
+for tenant:
+aishajalil387@gmail.com
+123456
 
 ## Project structure
 

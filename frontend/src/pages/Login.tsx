@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Building, Eye, EyeOff, AlertCircle, MessageCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -10,7 +10,7 @@ export default function Login() {
   const { signIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as { from?: Location })?.from?.pathname ?? '/';
+  const from = (location.state as { from?: Location })?.from?.pathname ?? '/dashboard';
 
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -20,7 +20,9 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(
+    () => (location.state as { signUp?: boolean })?.signUp ?? false
+  );
   const [city, setCity] = useState('');
   const [area, setArea] = useState('');
   const [latitude, setLatitude] = useState('');
@@ -149,11 +151,16 @@ export default function Login() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 bg-teal-700 rounded-xl flex items-center justify-center mb-4 shadow-card-md">
-            <Building size={24} className="text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">EstateFlow</h1>
-          <p className="text-sm text-gray-500 mt-1">AI-powered property management</p>
+          <Link
+            to="/"
+            className="flex flex-col items-center group"
+          >
+            <div className="w-12 h-12 bg-teal-700 rounded-xl flex items-center justify-center mb-4 shadow-card-md group-hover:bg-teal-800 transition-colors">
+              <Building size={24} className="text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900">EstateFlow</h1>
+            <p className="text-sm text-gray-500 mt-1">AI-powered property management</p>
+          </Link>
         </div>
 
         {/* Card */}

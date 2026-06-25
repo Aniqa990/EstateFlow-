@@ -67,8 +67,9 @@ export default function CalendarPage() {
     try {
       const { auth_url } = await getCalendarConnectUrl();
       window.location.href = auth_url;
-    } catch {
-      setMessage('Unable to start Google Calendar authorization.');
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : 'Unable to start Google Calendar authorization.';
+      setMessage(detail);
       setConnecting(false);
     }
   }

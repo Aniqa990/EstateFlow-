@@ -55,7 +55,7 @@ export function Layout() {
         { label: 'Calendar', to: '/calendar', icon: <CalendarDays size={18} />, roles: ['vendor'] },
       ]
     : [
-        { label: 'Dashboard', to: '/', icon: <LayoutDashboard size={18} />, roles: ['tenant', 'manager', 'inspector', 'admin'] },
+        { label: 'Dashboard', to: '/dashboard', icon: <LayoutDashboard size={18} />, roles: ['tenant', 'manager', 'inspector', 'admin'] },
         { label: 'New Request', to: '/submit', icon: <Plus size={18} />, roles: ['tenant'] },
         { label: 'Under Process', to: '/under-process', icon: <Loader2 size={18} />, roles: ['tenant'], showWhen: hasOpenRequests },
         { label: 'Approvals', to: '/approvals', icon: <CheckSquare size={18} />, roles: ['manager', 'admin'], badge: approvalCount },
@@ -74,7 +74,7 @@ export function Layout() {
 
   async function handleSignOut() {
     await signOut();
-    navigate('/login');
+    navigate('/');
   }
 
   const NavLinks = () => (
@@ -83,7 +83,7 @@ export function Layout() {
         <NavLink
           key={item.to}
           to={item.to}
-          end={item.to === '/'}
+          end={item.to === '/dashboard'}
           onClick={() => setMobileOpen(false)}
           className={({ isActive }) =>
             `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${

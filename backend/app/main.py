@@ -35,6 +35,7 @@ from app.api.routes import (
     vendors,
 )
 from app.config import get_settings
+from app.db import supabase_connectivity_error
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +75,8 @@ async def _vendor_followup_loop() -> None:
         try:
             processed = await vendors.process_pending_vendor_followups()
             logger.info("Vendor follow-up batch processed %s requests", processed)
+        except httpx.ConnectError as exc:
+            logger.warning("Vendor follow-up skipped — Supabase unreachable: %s", exc)
         except Exception:
             logger.exception("Vendor follow-up batch failed")
         await asyncio.sleep(3600)
@@ -87,6 +90,8 @@ async def _predictive_weekly_loop() -> None:
         try:
             stats = await run_predictive_maintenance_batch()
             logger.info("Predictive maintenance batch: %s", stats)
+        except httpx.ConnectError as exc:
+            logger.warning("Predictive maintenance skipped — Supabase unreachable: %s", exc)
         except Exception:
             logger.exception("Predictive maintenance batch failed")
         await asyncio.sleep(interval_sec)
@@ -94,6 +99,15 @@ async def _predictive_weekly_loop() -> None:
 
 @app.on_event("startup")
 async def startup_predictive_scheduler() -> None:
+    connectivity_error = supabase_connectivity_error()
+    if connectivity_error:
+        logger.warning(
+            "Supabase connectivity check failed: %s Background jobs are disabled.",
+            connectivity_error,
+        )
+        app.state.background_tasks = []
+        return
+
     app.state.background_tasks = [
         asyncio.create_task(_predictive_weekly_loop()),
         asyncio.create_task(_vendor_followup_loop()),

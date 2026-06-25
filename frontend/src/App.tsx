@@ -5,6 +5,8 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
 import ConfigError from './pages/ConfigError';
 import Login from './pages/Login';
+import Landing from './pages/Landing';
+import { GuestRoute } from './components/GuestRoute';
 import Dashboard from './pages/Dashboard';
 import SubmitRequest from './pages/SubmitRequest';
 import RequestDetail from './pages/RequestDetail';
@@ -24,12 +26,15 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route element={<GuestRoute />}>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+          </Route>
 
           {/* All protected routes share the authenticated layout */}
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
-              <Route index element={<Dashboard />} />
+              <Route path="dashboard" element={<Dashboard />} />
               <Route path="submit" element={
                 <ProtectedRoute allowedRoles={['tenant']}>
                   <SubmitRequest />
