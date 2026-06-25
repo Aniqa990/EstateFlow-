@@ -1,7 +1,7 @@
 fastapi==0.115.6
 uvicorn[standard]==0.32.1
 python-dotenv==1.0.1
-pydantic==2.10.3
+pydantic>=2.10.0
 pydantic-settings==2.6.1
 httpx==0.28.1
 supabase==2.11.0
@@ -12,7 +12,7 @@ langchain-core==0.3.28
 langchain-openai==0.2.14
 openai==1.58.1
 reportlab==4.2.5
-pillow==11.0.0
+pillow==12.2.0
 tzdata
 google-api-python-client>=2.100.0
 google-auth>=2.25.0
