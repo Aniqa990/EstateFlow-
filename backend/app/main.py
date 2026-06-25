@@ -42,6 +42,11 @@ logger = logging.getLogger(__name__)
 def _cors_origins() -> list[str]:
     return [o.strip() for o in get_settings().cors_origins.split(",") if o.strip()]
 
+
+def _cors_origin_regex() -> str | None:
+    regex = get_settings().cors_origin_regex.strip()
+    return regex or None
+
 app = FastAPI(
     title="EstateFlow API",
     description="Multi-agent property management platform",
@@ -51,6 +56,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_origins(),
+    allow_origin_regex=_cors_origin_regex(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -99,6 +105,10 @@ async def _predictive_weekly_loop() -> None:
 
 @app.on_event("startup")
 async def startup_predictive_scheduler() -> None:
+    logger.info("CORS allow_origins: %s", _cors_origins())
+    if _cors_origin_regex():
+        logger.info("CORS allow_origin_regex: %s", _cors_origin_regex())
+
     connectivity_error = supabase_connectivity_error()
     if connectivity_error:
         logger.warning(

@@ -1,6 +1,5 @@
 import { supabase } from './supabase';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+import { API_BASE_URL } from './config';
 
 async function getToken(): Promise<string | null> {
   const { data } = await supabase.auth.getSession();
@@ -25,7 +24,7 @@ async function request<T>(
     if (token) headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
+  const res = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
 
   if (!res.ok) {
     let message = res.statusText;
