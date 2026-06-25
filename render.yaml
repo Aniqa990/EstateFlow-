@@ -8,6 +8,8 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.6"
+      - key: CORS_ORIGIN_REGEX
+        value: "https://.*\\.vercel\\.app"
       # Set the rest in the Render dashboard (Secrets):
       # SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_JWT_SECRET
       # OPENROUTER_API_KEY, CORS_ORIGINS, CORS_ORIGIN_REGEX (optional)

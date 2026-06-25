@@ -19,6 +19,8 @@ export default function SubmitRequest() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [properties, setProperties] = useState<Property[]>([]);
+  const [propertiesLoading, setPropertiesLoading] = useState(true);
+  const [propertiesError, setPropertiesError] = useState('');
   const [propertyId, setPropertyId] = useState('');
   const [unit, setUnit] = useState('');
   const [issue, setIssue] = useState('');
@@ -34,9 +36,25 @@ export default function SubmitRequest() {
   const units = selectedProperty?.units ?? [];
 
   useEffect(() => {
+    setPropertiesLoading(true);
+    setPropertiesError('');
     fetchProperties()
-      .then(setProperties)
-      .catch(() => setProperties([]));
+      .then((rows) => {
+        setProperties(rows);
+        if (rows.length === 0) {
+          setPropertiesError(
+            'No properties are available yet. Ask a manager to add buildings under Properties, or run the seed SQL in Supabase.'
+          );
+        }
+      })
+      .catch((err) => {
+        setProperties([]);
+        const detail = err instanceof Error ? err.message : 'Could not load properties.';
+        setPropertiesError(
+          `${detail} Check that VITE_API_URL on Vercel points to your Render backend and CORS allows this site.`
+        );
+      })
+      .finally(() => setPropertiesLoading(false));
   }, []);
 
   function captureGeo() {
@@ -148,14 +166,20 @@ export default function SubmitRequest() {
               id="property"
               value={propertyId}
               onChange={e => { setPropertyId(e.target.value); setUnit(''); }}
-              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all bg-white"
+              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all bg-white disabled:bg-gray-50 disabled:text-gray-400"
               required
+              disabled={propertiesLoading || properties.length === 0}
             >
-              <option value="">Select property…</option>
+              <option value="">
+                {propertiesLoading ? 'Loading properties…' : 'Select property…'}
+              </option>
               {properties.map(p => (
                 <option key={p.id} value={p.id}>{p.name} — {p.city}</option>
               ))}
             </select>
+            {propertiesError && (
+              <p className="text-xs text-amber-700 mt-1.5">{propertiesError}</p>
+            )}
           </div>
 
           <div>

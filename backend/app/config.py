@@ -47,8 +47,8 @@ class Settings(BaseSettings):
     api_host: str = "0.0.0.0"
     api_port: int = 8000
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
-    # Optional regex for preview deployments, e.g. https://.*\.vercel\.app
-    cors_origin_regex: str = ""
+    # Allows all Vercel production + preview URLs when frontend is deployed on Vercel.
+    cors_origin_regex: str = r"https://.*\.vercel\.app"
     vendor_search_radius_km: float = 25.0
     brave_api_key: str = ""
     enable_external_vendor_search: bool = False

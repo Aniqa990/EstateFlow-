@@ -29,11 +29,20 @@ export default function Dashboard() {
 function TenantDashboard({ userId }: { userId?: string }) {
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
+    setLoading(true);
+    setLoadError('');
     fetchMaintenanceRequests()
       .then(setRequests)
-      .catch(() => setRequests([]))
+      .catch((err) => {
+        setRequests([]);
+        const detail = err instanceof Error ? err.message : 'Could not load requests.';
+        setLoadError(
+          `${detail} Your data is stored in Supabase — if this persists, verify VITE_API_URL on Vercel and SUPABASE_URL on Render point to the same project you used locally.`
+        );
+      })
       .finally(() => setLoading(false));
   }, [userId]);
 
@@ -62,6 +71,13 @@ function TenantDashboard({ userId }: { userId?: string }) {
         <StatCard label="In Progress" value={inProgress} icon={<ClipboardList size={18} />} color="teal" />
         <StatCard label="Resolved" value={resolved} icon={<CheckCircle2 size={18} />} color="green" />
       </div>
+
+      {loadError && (
+        <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+          <AlertTriangle size={16} className="text-amber-600 mt-0.5 flex-shrink-0" />
+          <p className="text-sm text-amber-800">{loadError}</p>
+        </div>
+      )}
 
       <RagChatPanel mode="tenant" />
 
