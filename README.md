@@ -31,32 +31,42 @@ Traditional maintenance is slow, manual, and prone to communication breakdown. E
 Every incoming maintenance issue flows through a 10-node orchestration pipeline:
 
 [Node 0: Security Agent]
-│
-├─► (Blocked if PII / Injection / Unauthorized) ──► END
-▼
+   │
+   ├─► (Blocked if PII / Injection / Unauthorized) ──► END
+   │
+   ▼
 [Node A: Complaint Agent] ──► Extracts trade, category, summary via LLM / Rules
-▼
+   │
+   ▼
 [Node B: Priority Agent]  ──► Risk Matrix lookup & SLA assignment (Triggers Manager Alert if High/Critical)
-▼
+   │
+   ▼
 [Node C: Compliance Agent] ──► Injects regulatory checks (Gas/Electrical safety, SLA flags)
-▼
+   │
+   ▼
 [Node D: Vendor Matching Agent] ──► Haversine proximity + rating - load penalty algorithm
-▼
+   │
+   ▼
 [Node E: Governance & Ethics Agent]
-│
-├─► (Awaiting Approval if High Risk/Unverified) ──► Pause for Human Gate
-▼
+   │
+   ├─► (Awaiting Approval if High Risk/Unverified) ──► Pause for Human Gate
+   │
+   ▼
 [Node F: Scheduling Agent] ──► Assigns work slot & updates ticket state
-▼
+   │
+   ▼
 [Node G: Communications Agent] ──► WhatsApp alert sent via TextMeBot
-▼
+   │
+   ▼
 [Node I: Report Agent] ──► ReportLab PDF generation + Audit Ledger construction
-│
-├─► (Draft status if Pending Signature) ──► Pause for Manager Signature
-▼
+   │
+   ├─► (Draft status if Pending Signature) ──► Pause for Manager Signature
+   │
+   ▼
 [Node 11: Performance Agent] ──► Evaluates latency, token usage, hallucination risk, & model suggestion
-▼
-[END]
+   │
+   ▼
+ [END]
 
 ## Stack
 
