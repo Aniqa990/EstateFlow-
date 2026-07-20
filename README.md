@@ -1,12 +1,77 @@
 # EstateFlow
 
-Enterprise multi-agent property management platform (Pakistan-first). Tenants submit maintenance via the web portal; LangGraph agents classify, prioritize, match vendors (geolocation + Supabase), and schedule. Managers run inspections with AI risk assessment.
+## 🚀 Overview
+
+**Estate Flow** is an enterprise-grade multi-agent property management platform designed to automate the complete lifecycle of maintenance request handling. From tenant text/image submission to geolocation-based vendor dispatching, safety compliance checks, human-in-the-loop approvals, and predictive forecasting—Estate Flow turns unstructured maintenance reports into an automated, verifiable, and structured operations pipeline.
+
+### Core Problem Solved
+Traditional maintenance is slow, manual, and prone to communication breakdown. Escalations go unmonitored, vendor assignments lack load balancing, and recurring property hazards are missed.
+
+### Key Solutions Brought by Estate Flow
+* **Smart Issue Triage:** Multilingual issue classification (English, Urdu, Roman Urdu).
+* **Security & PII Redaction:** Automatic scrubbing of sensitive Pakistani identifiers (CNIC, phone numbers, gate codes) before LLM inference.
+* **Deterministic Fallbacks:** Hardened rules step in if LLM services time out or fail.
+* **Human-in-the-Loop Gates:** Managers review critical safety hazards (gas/fire/flood) and unverified vendor assignments before final dispatch.
+* **Automated Audit Ledger:** Immutable step-by-step logs of every automated decision.
+
+---
+
+## 🔥 Key Features
+
+* **10-Node State Machine:** Powered by **LangGraph** for complete visibility and reproducible execution.
+* **Pakistan-First Localization:** Built-in CNIC detection, +92 phone format parsing, and Urdu/Roman Urdu NLP processing.
+* **Geolocation Vendor Matching:** Haversine distance-based matching with real-time vendor load balancing.
+* **Predictive Maintenance:** Weekly background schedulers scanning history to spot recurring trends and flag risks before catastrophic failures happen.
+* **Context-Aware RAG Chat:** Vector search over maintenance records for property-level decision-making.
+* **Whatsapp communication with vendor:** Communicates maintenance schedules with vendors via whatsapp keeping in mind this is the most frequent and accessible mode of communication in Pakistan for vendors
+---
+
+## ⚙️ The 10-Node LangGraph Agent Pipeline
+
+Every incoming maintenance issue flows through a 10-node orchestration pipeline:
+
+[Node 0: Security Agent]
+│
+├─► (Blocked if PII / Injection / Unauthorized) ──► END
+▼
+[Node A: Complaint Agent] ──► Extracts trade, category, summary via LLM / Rules
+▼
+[Node B: Priority Agent]  ──► Risk Matrix lookup & SLA assignment (Triggers Manager Alert if High/Critical)
+▼
+[Node C: Compliance Agent] ──► Injects regulatory checks (Gas/Electrical safety, SLA flags)
+▼
+[Node D: Vendor Matching Agent] ──► Haversine proximity + rating - load penalty algorithm
+▼
+[Node E: Governance & Ethics Agent]
+│
+├─► (Awaiting Approval if High Risk/Unverified) ──► Pause for Human Gate
+▼
+[Node F: Scheduling Agent] ──► Assigns work slot & updates ticket state
+▼
+[Node G: Communications Agent] ──► WhatsApp alert sent via TextMeBot
+▼
+[Node I: Report Agent] ──► ReportLab PDF generation + Audit Ledger construction
+│
+├─► (Draft status if Pending Signature) ──► Pause for Manager Signature
+▼
+[Node 11: Performance Agent] ──► Evaluates latency, token usage, hallucination risk, & model suggestion
+▼
+[END]
 
 ## Stack
 
 - **Frontend:** React + Vite + TypeScript + Supabase Auth
 - **Backend:** FastAPI + LangGraph + OpenRouter (Ollama fallback optional)
 - **Database:** Supabase PostgreSQL + Storage
+
+## 🔌 MCP Integration (Google Calendar)
+
+Estate Flow supports external tool orchestration using the **Model Context Protocol (MCP)**:
+
+* **Protocol:** JSON-RPC 2.0
+* **Endpoint:** `https://calendarmcp.googleapis.com/mcp/v1`
+* **Functionality:** Dispatches structured event payloads containing vendor assignment data, property location, and SLA timeframes directly to property manager calendars.
+
 
 ## Prerequisites
 
@@ -15,75 +80,38 @@ Enterprise multi-agent property management platform (Pakistan-first). Tenants su
 - Supabase project (schema applied)
 - OpenRouter API key
 
-## 1. Supabase setup
+---
 
-1. In [Supabase Dashboard](https://supabase.com/dashboard) → SQL Editor, run:
-   - `supabase/migrations/001_initial_schema.sql` (skip tables you already have; add missing columns like `latitude`, `longitude`, `maintenance_request_media`)
-   - `supabase/migrations/002_storage_and_rls.sql`
-2. Create Storage bucket: **maintenance-media** (private).
-3. Authentication → Providers → enable Email.
-4. Copy **Project URL**, **anon key**, **service_role key**, and **JWT Secret** (Settings → API).
+## 🌟 Visual Overview
 
-### If you already ran the original schema
+### 🤖 Live Agent Pipeline Visualizer
+![Live Agent Pipeline](assets/images/pipeline1.png)
+![Live Agent Pipeline](assets/images/pipeline2.png)
+*Real-time execution tracking across the 10 sequential AI agents during maintenance request processing.*
 
-Run only these additions in SQL Editor:
+---
 
-```sql
-ALTER TABLE properties ADD COLUMN IF NOT EXISTS latitude DOUBLE PRECISION;
-ALTER TABLE properties ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION;
-ALTER TABLE vendors ADD COLUMN IF NOT EXISTS latitude DOUBLE PRECISION;
-ALTER TABLE vendors ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION;
-ALTER TABLE vendors ADD COLUMN IF NOT EXISTS city TEXT;
-ALTER TABLE vendors ADD COLUMN IF NOT EXISTS area TEXT;
-ALTER TABLE maintenance_requests ADD COLUMN IF NOT EXISTS latitude DOUBLE PRECISION;
-ALTER TABLE maintenance_requests ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION;
-ALTER TABLE maintenance_requests DROP CONSTRAINT IF EXISTS maintenance_requests_status_check;
-ALTER TABLE maintenance_requests ADD CONSTRAINT maintenance_requests_status_check
-  CHECK (status IN ('Open', 'In Progress', 'Scheduled', 'Resolved', 'Pending Approval'));
+### 💬 RAG Chatbot Interface
+![Chatbot Page](assets/images/chatbot.png)
+*Natural language Q&A for tenants and managers powered by pgvector embeddings and RAG.*
 
-CREATE TABLE IF NOT EXISTS maintenance_request_media (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  request_id UUID NOT NULL REFERENCES maintenance_requests(id) ON DELETE CASCADE,
-  storage_path TEXT NOT NULL,
-  mime_type TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
+---
 
-ALTER TABLE maintenance_pipeline_results ADD COLUMN IF NOT EXISTS human_approved BOOLEAN DEFAULT FALSE;
-```
+### 📱 WhatsApp Automation & Vendor Dispatch
+![WhatsApp Message](assets/images/whatsapp.png)
+*Instant, non-blocking WhatsApp dispatches to vendors with 24-hour response confirmation loops.*
 
-### Seed Pakistan test data (properties, units, vendors)
+---
 
-Run in SQL Editor (in order):
+### 📅 Google Calendar Scheduling (MCP Integration)
+![Google Calendar Booking via MCP](assets/images/calendar.png)
+*Seamless work-slot scheduling and availability sync using Model Context Protocol (MCP).*
 
-0. **`008_add_geo_columns.sql`** — only if your DB was created from the original schema without `latitude`/`longitude`
-1. `005_seed_pakistan_data.sql` — 3 properties, 7 units, 10 named vendors
-2. `006_seed_100_vendors.sql` — **100 vendors** with geo spread across cities
-3. `007_seed_more_properties.sql` — 5 more properties + units
+---
 
-(005–007 now auto-add geo columns if missing; running **008** first is still the clearest fix.)
+## Environment files
 
-Verify vendors: `SELECT COUNT(*) FROM vendors WHERE email LIKE 'vendor%@estateflow.pk';` → should be **100**.
-
-### How properties work (you do NOT have to use Supabase UI)
-
-| Role                  | What to do                                                         |
-| --------------------- | ------------------------------------------------------------------ |
-| **Dev / quick start** | Run seed SQL above — tenants see properties in dropdown            |
-| **Manager / admin**   | App → **Properties** → add building name, city, units (`101, 102`) |
-| **Manual (optional)** | Supabase → Table Editor → `properties` + `units`                   |
-
-Tenants **cannot** create properties; they only select from the list when submitting a request.
-
-Update vendor coordinates for Karachi/Lahore tests:
-
-```sql
-UPDATE vendors SET latitude = 24.8607, longitude = 67.0011, city = 'Karachi' WHERE specialty = 'plumbing' LIMIT 1;
-```
-
-## 2. Environment files
-
-**Environment** — copy `.env.example` to either `EstateFlow/.env` (repo root) or `backend/.env` (both work):
+**Backend**
 
 ```env
 SUPABASE_URL=https://xxxx.supabase.co
@@ -95,7 +123,7 @@ OPENROUTER_MODEL=meta-llama/llama-3.1-8b-instruct:free
 CORS_ORIGINS=http://localhost:5173
 ```
 
-**Frontend** — uses the same root `EstateFlow/.env` (must include `VITE_*` keys). Or copy `frontend/.env.example` to `frontend/.env`:
+**Frontend**
 
 ```env
 VITE_SUPABASE_URL=https://xxxx.supabase.co
@@ -103,7 +131,7 @@ VITE_SUPABASE_ANON_KEY=eyJ...
 VITE_API_URL=http://localhost:8000
 ```
 
-## 3. Backend
+## Backend
 
 ```powershell
 cd backend
@@ -115,7 +143,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 API docs: http://localhost:8000/docs
 
-## 4. Frontend
+## Frontend
 
 ```powershell
 cd frontend
@@ -125,31 +153,6 @@ npm run dev
 
 App: http://localhost:5173
 
-## 5. First users
-
-1. Sign up as **tenant** → submit a request (Roman Urdu text + optional photo + geolocation).
-2. Sign up as **manager** → open **Approvals** for Critical items.
-3. Add vendors with lat/lng via **Vendors** (manager) for nearest-match to work.
-
-## Maintenance agent pipeline
-
-1. `pii_redactor` — masks CNIC/phone/email
-2. `security_scanner` — injection/spam
-3. `fraud_check` — duplicate submissions (24h)
-4. `intake_classifier` — category/urgency (OpenRouter)
-5. `governance` — compliance flags, human gate for Critical
-6. `performance_monitor` — SLA score
-7. `dispatcher` — haversine vendor match + schedule
-
-Results persist to `maintenance_pipeline_results` and `agent_logs`.
-
-for manager
-aisha@gmail.com
-123456
-
-for tenant:
-aishajalil387@gmail.com
-123456
 
 ## Project structure
 
@@ -160,3 +163,5 @@ EstateFlow/
 ├── supabase/migrations/  # SQL schema + RLS
 └── README.md
 ```
+
+Built with ❤️ for automated, reliable, and intelligent property management operations.
