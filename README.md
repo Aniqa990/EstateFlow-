@@ -30,22 +30,44 @@ Traditional maintenance is slow, manual, and prone to communication breakdown. E
 
 Every incoming maintenance issue flows through a 10-node orchestration pipeline:
 
-```markdown
-```mermaid
-flowchart TD
-    N0["Node 0: Security Agent"] -->|Blocked if PII / Injection / Unauthorized| END["END"]
-    N0 --> NA["Node A: Complaint Agent<br/><i>Extracts trade, category, summary via LLM / Rules</i>"]
-    NA --> NB["Node B: Priority Agent<br/><i>Risk Matrix lookup & SLA assignment</i>"]
-    NB --> NC["Node C: Compliance Agent<br/><i>Injects regulatory checks (Gas/Electrical safety)</i>"]
-    NC --> ND["Node D: Vendor Matching Agent<br/><i>Haversine proximity + load penalty algorithm</i>"]
-    ND --> NE["Node E: Governance & Ethics Agent"]
-    NE -->|Awaiting Approval if High Risk/Unverified| HG["Pause for Human Gate"]
-    NE --> NF["Node F: Scheduling Agent<br/><i>Assigns work slot & updates ticket state</i>"]
-    NF --> NG["Node G: Communications Agent<br/><i>WhatsApp alert sent via TextMeBot</i>"]
-    NG --> NI["Node I: Report Agent<br/><i>ReportLab PDF generation + Audit Ledger</i>"]
-    NI -->|Draft status if Pending Signature| MS["Pause for Manager Signature"]
-    NI --> N11["Node 11: Performance Agent<br/><i>Evaluates latency, token usage, hallucination risk</i>"]
-    N11 --> END
+```text
+[Node 0: Security Agent]
+   │
+   ├─► (Blocked if PII / Injection / Unauthorized) ──► END
+   │
+   ▼
+[Node A: Complaint Agent] ──► Extracts trade, category, summary via LLM / Rules
+   │
+   ▼
+[Node B: Priority Agent]  ──► Risk Matrix lookup & SLA assignment (Triggers Manager Alert if High/Critical)
+   │
+   ▼
+[Node C: Compliance Agent] ──► Injects regulatory checks (Gas/Electrical safety, SLA flags)
+   │
+   ▼
+[Node D: Vendor Matching Agent] ──► Haversine proximity + rating - load penalty algorithm
+   │
+   ▼
+[Node E: Governance & Ethics Agent]
+   │
+   ├─► (Awaiting Approval if High Risk/Unverified) ──► Pause for Human Gate
+   │
+   ▼
+[Node F: Scheduling Agent] ──► Assigns work slot & updates ticket state
+   │
+   ▼
+[Node G: Communications Agent] ──► WhatsApp alert sent via TextMeBot
+   │
+   ▼
+[Node I: Report Agent] ──► ReportLab PDF generation + Audit Ledger construction
+   │
+   ├─► (Draft status if Pending Signature) ──► Pause for Manager Signature
+   │
+   ▼
+[Node 11: Performance Agent] ──► Evaluates latency, token usage, hallucination risk, & model suggestion
+   │
+   ▼
+ [END]
 ```
 
 ## Stack
